@@ -1,7 +1,17 @@
-package fi.ishtech.practice.bookapp.lambda;
+package fi.ishtech.practice.bookapp.lambda.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+<<<<<<< HEAD:src/main/java/fi/ishtech/practice/bookapp/lambda/CreateBookHandler.java
+=======
+
+import fi.ishtech.practice.bookapp.lambda.AppConstants;
+import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
+import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
+import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
+import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+>>>>>>> 22f352e (refactor package name):src/main/java/fi/ishtech/practice/bookapp/lambda/handler/CreateBookHandler.java
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;

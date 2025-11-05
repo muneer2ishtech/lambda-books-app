@@ -12,7 +12,7 @@
     4. After creation → open Code tab → Upload from → .zip or .jar file
         - Upload target/lambda-books-app.jar
     5. Under Runtime settings → Edit handler, set:
-        - `fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest`
+        - `fi.ishtech.practice.bookapp.lambda.handler.CreateBookHandler::handleRequest`
     6. Add environment variables:
         - `BOOK_TABLE = books`
         - `AWS_REGION = eu-west-1`
@@ -22,8 +22,8 @@
 
 | Lambda Function Name | Handler |
 |----------------------|---------|
-| lambda-books-findById | fi.ishtech.practice.bookapp.lambda.FindBookByIdHandler::handleRequest |
-| lambda-books-findAll | fi.ishtech.practice.bookapp.lambda.FindAllBooksHandler::handleRequest |
-| lambda-books-update | fi.ishtech.practice.bookapp.lambda.UpdateBookHandler::handleRequest |
-| lambda-books-deleteById | fi.ishtech.practice.bookapp.lambda.DeleteBookByIdHandler::handleRequest |
-| lambda-books-findByConditions | fi.ishtech.practice.bookapp.lambda.FindByConditionsHandler::handleRequest |
+| lambda-books-findById | fi.ishtech.practice.bookapp.lambda.handler.FindBookByIdHandler::handleRequest |
+| lambda-books-findAll | fi.ishtech.practice.bookapp.lambda.handler.FindAllBooksHandler::handleRequest |
+| lambda-books-update | fi.ishtech.practice.bookapp.lambda.handler.UpdateBookHandler::handleRequest |
+| lambda-books-deleteById | fi.ishtech.practice.bookapp.lambda.handler.DeleteBookByIdHandler::handleRequest |
+| lambda-books-findByConditions | fi.ishtech.practice.bookapp.lambda.handler.FindByConditionsHandler::handleRequest |

@@ -1,4 +1,4 @@
-package fi.ishtech.practice.bookapp.lambda;
+package fi.ishtech.practice.bookapp.lambda.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -10,6 +10,24 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import java.util.HashMap;
 import java.util.Map;
 
+<<<<<<< HEAD:src/main/java/fi/ishtech/practice/bookapp/lambda/UpdateBookHandler.java
+=======
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+import fi.ishtech.practice.bookapp.lambda.AppConstants;
+import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
+import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
+
+/**
+ * Handler for updating book
+ *
+ * @author Muneer Ahmed Syed
+ */
+>>>>>>> 22f352e (refactor package name):src/main/java/fi/ishtech/practice/bookapp/lambda/handler/UpdateBookHandler.java
 public class UpdateBookHandler implements RequestHandler<BookDto, String> {
 
     private final DynamoDbClient dynamoDb = DynamoDbClientProvider.getClient();

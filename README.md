@@ -44,7 +44,7 @@ sam deploy --guided --profile muneer2ishtech
 
 
 Upload the JAR to AWS Lambda (Upload from .zip or .jar). Set handler for each function, e.g.:
-`fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest`
+`fi.ishtech.practice.bookapp.lambda.handler.CreateBookHandler::handleRequest`
 
 Environment variables (set in Lambda configuration):
 - BOOK_TABLE = books
