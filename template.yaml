@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Lambda Books App (Java 17 + DynamoDB)
+Description: Lambda Books App (Java 17 + DynamoDB + API Gateway)
 
 Globals:
   Function:
@@ -12,6 +12,15 @@ Globals:
         TABLE_NAME: books
 
 Resources:
+  BooksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
   CreateBookFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -21,6 +30,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: post
+            RestApiId: !Ref BooksApi
 
   UpdateBookFunction:
     Type: AWS::Serverless::Function
@@ -31,6 +47,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: put
+            RestApiId: !Ref BooksApi
 
   DeleteBookByIdFunction:
     Type: AWS::Serverless::Function
@@ -41,6 +64,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: delete
+            RestApiId: !Ref BooksApi
 
   FindAllBooksFunction:
     Type: AWS::Serverless::Function
@@ -51,6 +81,13 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: get
+            RestApiId: !Ref BooksApi
 
   FindBookByIdFunction:
     Type: AWS::Serverless::Function
@@ -61,3 +98,10 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: get
+            RestApiId: !Ref BooksApi
