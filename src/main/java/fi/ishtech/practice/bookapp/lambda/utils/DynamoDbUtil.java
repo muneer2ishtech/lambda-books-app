@@ -44,23 +44,27 @@ public class DynamoDbUtil {
 	}
 
 	private static AttributeValue getAttributeValue(Map<String, AttributeValue> item, String name) {
-		return item.get(name);
+		return item == null ? null : item.get(name);
 	}
 
 	public static String getStringAttributeValue(Map<String, AttributeValue> item, String name) {
-		return getAttributeValue(item, name).s();
+		AttributeValue val = getAttributeValue(item, name);
+		return val == null ? null : val.s();
 	}
 
 	public static String getNumberAttributeValue(Map<String, AttributeValue> item, String name) {
-		return getAttributeValue(item, name).n();
+		AttributeValue val = getAttributeValue(item, name);
+		return val == null ? null : val.n();
 	}
 
 	public static Short getShortAttributeValue(Map<String, AttributeValue> item, String name) {
-		return Short.valueOf(getNumberAttributeValue(item, name));
+		String val = getNumberAttributeValue(item, name);
+		return val == null ? null : Short.valueOf(val);
 	}
 
 	public static BigDecimal getBigDecimalAttributeValue(Map<String, AttributeValue> item, String name) {
-		return new BigDecimal(getNumberAttributeValue(item, name));
+		String val = getNumberAttributeValue(item, name);
+		return val == null ? null : new BigDecimal(getNumberAttributeValue(item, name));
 	}
 
 }
