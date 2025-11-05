@@ -15,12 +15,12 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<aws.sdk.version>2.25.25</aws.sdk.version>
-		<lambda.core.version>1.2.3</lambda.core.version>
-		<jackson.version>2.15.2</jackson.version>
-		<slf4j.version>1.7.30</slf4j.version>
+		<aws.sdk.version>2.37.4</aws.sdk.version>
+		<lambda.core.version>1.4.0</lambda.core.version>
+		<jackson.version>2.20.1</jackson.version>
+		<slf4j.version>1.7.36</slf4j.version>
 
-		<maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
+		<maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
 	</properties>
 
 	<dependencies>
