@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda Books App (Java 17 + DynamoDB)
+
+Globals:
+  Function:
+    Runtime: java17
+    Timeout: 20
+    MemorySize: 512
+    Environment:
+      Variables:
+        TABLE_NAME: books
+
+Resources:
+  CreateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-create
+      Handler: fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest
+      CodeUri: target/lambda-books-app.jar
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: books
+
+  UpdateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-update
+      Handler: fi.ishtech.practice.bookapp.lambda.UpdateBookHandler::handleRequest
+      CodeUri: target/lambda-books-app.jar
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: books
+
+  DeleteBookByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-delete-by-id
+      Handler: fi.ishtech.practice.bookapp.lambda.DeleteBookByIdHandler::handleRequest
+      CodeUri: target/lambda-books-app.jar
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: books
+
+  FindAllBooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-find-all
+      Handler: fi.ishtech.practice.bookapp.lambda.FindAllBooksHandler::handleRequest
+      CodeUri: target/lambda-books-app.jar
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: books
+
+  FindBookByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-find-by-id
+      Handler: fi.ishtech.practice.bookapp.lambda.FindBookByIdHandler::handleRequest
+      CodeUri: target/lambda-books-app.jar
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: books
