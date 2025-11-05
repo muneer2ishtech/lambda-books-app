@@ -17,7 +17,7 @@ Resources:
     Properties:
       FunctionName: lambda-books-create
       Handler: fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
@@ -27,7 +27,7 @@ Resources:
     Properties:
       FunctionName: lambda-books-update
       Handler: fi.ishtech.practice.bookapp.lambda.UpdateBookHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
@@ -37,7 +37,7 @@ Resources:
     Properties:
       FunctionName: lambda-books-delete-by-id
       Handler: fi.ishtech.practice.bookapp.lambda.DeleteBookByIdHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
@@ -47,7 +47,7 @@ Resources:
     Properties:
       FunctionName: lambda-books-find-all
       Handler: fi.ishtech.practice.bookapp.lambda.FindAllBooksHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
@@ -57,7 +57,7 @@ Resources:
     Properties:
       FunctionName: lambda-books-find-by-id
       Handler: fi.ishtech.practice.bookapp.lambda.FindBookByIdHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
