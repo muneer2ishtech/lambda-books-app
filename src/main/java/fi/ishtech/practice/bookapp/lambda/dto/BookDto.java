@@ -3,17 +3,10 @@ package fi.ishtech.practice.bookapp.lambda.dto;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
-import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * DTO for Book
@@ -89,6 +82,19 @@ public class BookDto implements Serializable {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		// @formatter:off
+		return "BookDto("
+				+ "id=" + id
+				+ ", " + "title=" + title
+				+ ", " + "author=" + author
+				+ ", " + "year=" + year
+				+ ", " + "price=" + price
+				+ ")";
+		// @formatter:on
 	}
 
 }
