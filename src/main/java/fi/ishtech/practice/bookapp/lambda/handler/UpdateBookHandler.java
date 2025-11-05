@@ -59,14 +59,14 @@ public class UpdateBookHandler implements RequestHandler<BookDto, String> {
 			return "nothing to update";
 
 		// @formatter:off
-        UpdateItemRequest req = UpdateItemRequest.builder()
-        		.tableName(AppConstants.TABLE_BOOK)
-        		.key(Map.of("id", AttributeValue.builder().s(book.getId()).build()))
-        		.updateExpression("SET " + setExpr.toString())
-        		.expressionAttributeNames(exprNames)
-        		.expressionAttributeValues(exprValues)
-        		.build();
-        // @formatter:on
+		UpdateItemRequest req = UpdateItemRequest.builder()
+				.tableName(AppConstants.TABLE_BOOK)
+				.key(Map.of("id", AttributeValue.builder().s(book.getId()).build()))
+				.updateExpression("SET " + setExpr.toString())
+				.expressionAttributeNames(exprNames)
+				.expressionAttributeValues(exprValues)
+				.build();
+		// @formatter:on
 
 		dynamoDb.updateItem(req);
 		return book.getId();

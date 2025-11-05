@@ -35,12 +35,12 @@ public class FindBookByIdHandler implements RequestHandler<String, BookDto> {
 		Map<String, AttributeValue> key = Map.of("id", AttributeValue.builder().s(id).build());
 
 		// @formatter:off
-        GetItemResponse resp = dynamoDb.getItem(
-        		GetItemRequest.builder()
-        			.tableName(AppConstants.TABLE_BOOK)
-        			.key(key)
-        		.build());
-        // @formatter:on
+		GetItemResponse resp = dynamoDb.getItem(
+				GetItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.key(key)
+				.build());
+		// @formatter:on
 
 		BookDto book = BookMapper.fromItemResponse(resp);
 		log.debug("Output Book:{}", book);
