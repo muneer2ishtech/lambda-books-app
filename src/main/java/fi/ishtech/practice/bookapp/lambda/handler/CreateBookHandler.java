@@ -2,6 +2,9 @@ package fi.ishtech.practice.bookapp.lambda.handler;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
@@ -21,10 +24,14 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
  */
 public class CreateBookHandler implements RequestHandler<BookDto, String> {
 
+	private static final Logger log = LoggerFactory.getLogger(CreateBookHandler.class);
+
 	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
 
 	@Override
 	public String handleRequest(BookDto book, Context context) {
+		log.debug("Input Book:{}", book);
+
 		// TODO: asert book is not null
 
 		// TODO: assert book.id is null
@@ -33,6 +40,7 @@ public class CreateBookHandler implements RequestHandler<BookDto, String> {
 		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
 
 		dynamoDb.putItem(PutItemRequest.builder().tableName(AppConstants.TABLE_BOOK).item(item).build());
+		log.debug("Output Book ID:{}", book.getId());
 
 		return book.getId();
 	}

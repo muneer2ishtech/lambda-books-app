@@ -3,6 +3,9 @@ package fi.ishtech.practice.bookapp.lambda.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
@@ -20,10 +23,14 @@ import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
  */
 public class UpdateBookHandler implements RequestHandler<BookDto, String> {
 
+	private static final Logger log = LoggerFactory.getLogger(UpdateBookHandler.class);
+
 	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
 
 	@Override
 	public String handleRequest(BookDto book, Context context) {
+		log.debug("Input Book:{}", book);
+
 		if (book.getId() == null)
 			throw new IllegalArgumentException("id required");
 
