@@ -1,10 +1,11 @@
-package fi.ishtech.practice.bookapp.lambda;
+package fi.ishtech.practice.bookapp.lambda.handler;
 
 import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
+import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
 import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
 import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;

@@ -25,7 +25,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-create
-      Handler: fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.CreateBookHandler::handleRequest
       CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
@@ -42,7 +42,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-update
-      Handler: fi.ishtech.practice.bookapp.lambda.UpdateBookHandler::handleRequest
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.UpdateBookHandler::handleRequest
       CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
@@ -59,7 +59,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-delete-by-id
-      Handler: fi.ishtech.practice.bookapp.lambda.DeleteBookByIdHandler::handleRequest
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.DeleteBookByIdHandler::handleRequest
       CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
@@ -76,7 +76,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-find-all
-      Handler: fi.ishtech.practice.bookapp.lambda.FindAllBooksHandler::handleRequest
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.FindAllBooksHandler::handleRequest
       CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
@@ -93,7 +93,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-find-by-id
-      Handler: fi.ishtech.practice.bookapp.lambda.FindBookByIdHandler::handleRequest
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.FindBookByIdHandler::handleRequest
       CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
