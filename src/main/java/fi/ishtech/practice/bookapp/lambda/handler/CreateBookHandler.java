@@ -12,16 +12,10 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
-import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
 import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
 import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
-import software.amazon.awssdk.annotations.NotNull;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 /**
  * Handler for creating new book
@@ -33,19 +27,22 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 	private static final Logger log = LoggerFactory.getLogger(CreateBookHandler.class);
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 		String input = request.getBody();
 		log.debug("Input: {}", input);
 
+		// TODO: assert book is not null
+		// TODO: assert book.id is null
+
 		Map<String, String> responseBody = new HashMap<>();
 
-		BookDto book;
 		try {
-			book = MAPPER.readValue(input, BookDto.class);
-			createBook(book);
+			BookDto book = MAPPER.readValue(input, BookDto.class);
+			book.setId(IdUtil.newId());
+
+			BookDao.createBook(book);
 
 			responseBody.put(BookDto.ID, book.getId());
 
@@ -55,22 +52,6 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 		} catch (Exception e) {
 			return PayloadUtil.internalServerErrorResponse(e);
 		}
-	}
-
-	private String createBook(@NotNull BookDto book) {
-		log.debug("Input Book:{}", book);
-
-		// TODO: assert book is not null
-
-		// TODO: assert book.id is null
-		book.setId(IdUtil.newId());
-
-		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
-
-		dynamoDb.putItem(PutItemRequest.builder().tableName(AppConstants.TABLE_BOOK).item(item).build());
-		log.debug("Output Book ID:{}", book.getId());
-
-		return book.getId();
 	}
 
 }

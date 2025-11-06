@@ -15,12 +15,30 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 public class BookDao {
 
 	public static final Logger log = LoggerFactory.getLogger(BookDao.class);
 
 	private static final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
+
+	public static BookDto createBook(BookDto book) {
+		log.debug("Input Book:{}", book);
+
+		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
+
+		// @formatter:off
+		dynamoDb.putItem(
+				PutItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.item(item)
+					.build());
+		// @formatter:on
+		log.debug("Created Book with id:{}", book.getId());
+
+		return book;
+	}
 
 	public static BookDto findOneById(String id) {
 		log.debug("Input Book ID:{}", id);
