@@ -56,7 +56,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /books/{id}
+            Path: /books
             Method: put
             RestApiId: !Ref BooksApi
 

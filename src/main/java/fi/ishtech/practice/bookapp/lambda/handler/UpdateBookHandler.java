@@ -27,23 +27,28 @@ public class UpdateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-		String input = request.getBody();
-		log.debug("Input: {}", input);
+		String inputBody = request.getBody();
+		log.trace("Input body: {}", inputBody);
 
-		if (input == null) {
+		if (inputBody == null) {
 			throw new IllegalArgumentException("Input body for Book is mandatory");
 		}
 
 		try {
-			BookDto book = MAPPER.readValue(input, BookDto.class);			log.trace(input);
+			BookDto input = MAPPER.readValue(inputBody, BookDto.class);
+			log.trace("Input:{}", input);
 
-			if (StringUtils.isBlank(book.getId())) {
+			if (StringUtils.isBlank(input.getId())) {
 				throw new IllegalArgumentException("Input Book to update must have id");
 			}
 
-			BookDao.findAndUpdate(book);
+			BookDto output = BookDao.findAndUpdate(input);
 
-			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
+			if (output == null) {
+				return PayloadUtil.notFoundResponse("Book for id:" + input.getId() + " not found");
+			}
+
+			return PayloadUtil.successResponse(MAPPER.writeValueAsString(output));
 		} catch (IllegalArgumentException e) {
 			return PayloadUtil.badRequestResponse(e);
 		} catch (Exception e) {
