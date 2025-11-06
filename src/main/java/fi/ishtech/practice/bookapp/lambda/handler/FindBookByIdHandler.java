@@ -50,7 +50,7 @@ public class FindBookByIdHandler implements RequestHandler<APIGatewayProxyReques
 			BookDto book = findOneById(id);
 
 			if (book == null) {
-				return PayloadUtil.notFoundResponse(pathParams.toString());
+				return PayloadUtil.notFoundResponse("Book for id:" + id + " not found");
 			}
 
 			return PayloadUtil.successResponse(MAPPER.writeValueAsString(book));
