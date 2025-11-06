@@ -57,7 +57,7 @@ public class UpdateBookAttribsByIdHandler
 		// @formatter:on
 
 		if (CollectionUtils.isNullOrEmpty(bookParams)) {
-			return PayloadUtil.badRequestResponse("No inputs to update");
+			return PayloadUtil.badRequestResponse("No relavant inputs to update");
 		}
 
 		try {

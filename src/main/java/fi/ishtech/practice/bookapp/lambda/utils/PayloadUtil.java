@@ -3,6 +3,9 @@ package fi.ishtech.practice.bookapp.lambda.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -11,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Muneer Ahmed Syed
  */
 public class PayloadUtil {
+
+	private static final Logger log = LoggerFactory.getLogger(PayloadUtil.class);
 
 	private static final String STATUS = "status";
 	private static final String ERROR = "error";
@@ -38,6 +43,8 @@ public class PayloadUtil {
 	}
 
 	public static APIGatewayProxyResponseEvent errorResponse(int status, String error, Exception ex) {
+		log.error("Exception:", ex);
+
 		Map<String, Object> errorBody = new HashMap<>();
 		errorBody.put(STATUS, status);
 		errorBody.put(ERROR, error);
@@ -64,8 +71,10 @@ public class PayloadUtil {
 					.withBody(MAPPER.writeValueAsString(errorBody))
 					.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
 			// @formatter:on
-		} catch (Exception e) {
+		} catch (Exception ex) {
 			// fallback if JSON serialization fails
+			log.warn("Exception in dealing with errorBody:", ex);
+
 			// @formatter:off
 			return new APIGatewayProxyResponseEvent()
 					.withStatusCode(500)
@@ -90,7 +99,7 @@ public class PayloadUtil {
 	public static APIGatewayProxyResponseEvent badRequestResponse(String message) {
 		return errorResponse(400, "Bad Request", message);
 	}
-	
+
 	public static APIGatewayProxyResponseEvent notFoundResponse(String message) {
 		return errorResponse(404, "Not found", message);
 	}
