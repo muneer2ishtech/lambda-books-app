@@ -1,7 +1,6 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;

@@ -17,7 +17,7 @@ Resources:
     Properties:
       StageName: dev
       Cors:
-        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowMethods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
       MethodSettings:
@@ -111,6 +111,23 @@ Resources:
             Method: get
             RestApiId: !Ref BooksApi
 
+  UpdateBookAttribsByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-update-attribs-by-id
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.UpdateBookAttribsByIdHandler::handleRequest
+      CodeUri: .
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: patch
+            RestApiId: !Ref BooksApi
+
   # ---- Lambda Invoke Permissions ----
   CreateBookFunctionPermission:
     Type: AWS::Lambda::Permission
@@ -151,3 +168,11 @@ Resources:
       FunctionName: !Ref DeleteBookByIdFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/DELETE/books/*
+
+  UpdateBookAttribsByIdFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref UpdateBookAttribsByIdFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/PATCH/books/*
