@@ -83,6 +83,9 @@ public class PayloadUtil {
 		return errorResponse(400, "Bad Request", e);
 	}
 
+	public static APIGatewayProxyResponseEvent badRequestResponse(String message) {
+		return errorResponse(400, "Bad Request", message);
+	}
 	public static APIGatewayProxyResponseEvent notFoundResponse(String message) {
 		return errorResponse(404, "Not found", message);
 	}
