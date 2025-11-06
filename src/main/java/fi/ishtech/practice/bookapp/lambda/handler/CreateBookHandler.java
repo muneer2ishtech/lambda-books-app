@@ -1,8 +1,5 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +13,10 @@ import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
 import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
 import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
 import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
- * Handler for creating new book
+ * Handler for creating a new book
  *
  * @author Muneer Ahmed Syed
  */
@@ -33,18 +31,20 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 		String input = request.getBody();
 		log.debug("Input: {}", input);
 
-		// TODO: assert book is not null
-		// TODO: assert book.id is null
-
-		Map<String, String> responseBody = new HashMap<>();
+		if (input == null) {
+			throw new IllegalArgumentException("Input body for Book is mandatory");
+		}
 
 		try {
 			BookDto book = MAPPER.readValue(input, BookDto.class);
+
+			if (StringUtils.isNotBlank(book.getId())) {
+				throw new IllegalArgumentException("Input for new Book cannot have id");
+			}
+
 			book.setId(IdUtil.newId());
 
 			BookDao.createBook(book);
-
-			responseBody.put(BookDto.ID, book.getId());
 
 			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
 		} catch (IllegalArgumentException e) {
