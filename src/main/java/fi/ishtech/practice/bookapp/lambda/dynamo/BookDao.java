@@ -1,6 +1,7 @@
 package fi.ishtech.practice.bookapp.lambda.dynamo;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,20 +116,20 @@ public class BookDao {
 			return null;
 		}
 
-		Map<String, AttributeValue> item = ex.item();
+		Map<String, AttributeValue> item = new HashMap<>(ex.item());
 
 		String title = bookParams.get(BookDto.TITLE);
-		if (StringUtils.isEmpty(title)) {
+		if (StringUtils.isNotBlank(title)) {
 			item.put(BookDto.TITLE, DynamoDbUtil.buildStringAttribute(title));
 		}
 
 		String author = bookParams.get(BookDto.AUTHOR);
-		if (StringUtils.isEmpty(author)) {
+		if (StringUtils.isNotBlank(author)) {
 			item.put(BookDto.AUTHOR, DynamoDbUtil.buildStringAttribute(author));
 		}
 
 		String strYear = bookParams.get(BookDto.YEAR);
-		if (StringUtils.isEmpty(strYear)) {
+		if (StringUtils.isNotBlank(strYear)) {
 			try {
 				item.put(BookDto.YEAR, DynamoDbUtil.buildNumberAttribute(Short.valueOf(strYear)));
 			} catch (NumberFormatException e) {
@@ -137,13 +138,15 @@ public class BookDao {
 		}
 
 		String strPrice = bookParams.get(BookDto.PRICE);
-		if (StringUtils.isEmpty(strPrice)) {
+		if (StringUtils.isNotBlank(strPrice)) {
 			try {
 				item.put(BookDto.PRICE, DynamoDbUtil.buildNumberAttribute(new BigDecimal(strPrice)));
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("Invalid input for year:" + strYear, e);
 			}
 		}
+
+		log.trace("Book item to update:{}", item);
 
 		putItemInDb(item);
 		log.debug("Updated Book attributes of id:{}", id);
