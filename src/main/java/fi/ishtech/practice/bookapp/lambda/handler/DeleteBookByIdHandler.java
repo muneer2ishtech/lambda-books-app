@@ -1,32 +1,52 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-<<<<<<< HEAD:src/main/java/fi/ishtech/practice/bookapp/lambda/DeleteBookByIdHandler.java
-=======
-
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
->>>>>>> 22f352e (refactor package name):src/main/java/fi/ishtech/practice/bookapp/lambda/handler/DeleteBookByIdHandler.java
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-
 import java.util.Map;
 
-public class DeleteBookByIdHandler implements RequestHandler<String, String> {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    private final DynamoDbClient dynamoDb = DynamoDbClientProvider.getClient();
-    private final String table = System.getenv().getOrDefault("BOOK_TABLE", "books");
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
-    @Override
-    public String handleRequest(String id, Context context) {
-        dynamoDb.deleteItem(DeleteItemRequest.builder()
-                .tableName(table)
-                .key(Map.of("id", AttributeValue.builder().s(id).build()))
-                .build());
-        return id;
-    }
+import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
+import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.StringUtils;
+
+/**
+ * Handler for deleting book
+ *
+ * @author Muneer Ahmed Syed
+ */
+public class DeleteBookByIdHandler
+		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+
+	public static final Logger log = LoggerFactory.getLogger(DeleteBookByIdHandler.class);
+
+	@Override
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		Map<String, String> pathParams = request.getPathParameters();
+		log.trace("Request PathParameters: {}", pathParams);
+
+		String id = pathParams.get(BookDto.ID);
+		log.debug("Input id:{}", id);
+
+		if (StringUtils.isBlank(id)) {
+			return PayloadUtil.badRequestResponse("Input id is mandatory");
+		}
+
+		try {
+			boolean result = BookDao.deleteByIdAndConfirm(id);
+			if (result) {
+				return PayloadUtil.goneResponse("Deleted successfully Book with id:" + id);
+			} else {
+				return PayloadUtil.internalServerErrorResponse("Delete failed for Book with id:" + id);
+			}
+		} catch (Exception e) {
+			return PayloadUtil.internalServerErrorResponse(e);
+		}
+	}
+
 }

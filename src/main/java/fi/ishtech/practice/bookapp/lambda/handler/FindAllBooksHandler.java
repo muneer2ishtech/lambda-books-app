@@ -1,43 +1,46 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-<<<<<<< HEAD:src/main/java/fi/ishtech/practice/bookapp/lambda/FindAllBooksHandler.java
-=======
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
-import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
->>>>>>> 22f352e (refactor package name):src/main/java/fi/ishtech/practice/bookapp/lambda/handler/FindAllBooksHandler.java
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
-import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
+import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+/**
+ * Handler for finding all books
+ *
+ * @author Muneer Ahmed Syed
+ */
+public class FindAllBooksHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-public class FindAllBooksHandler implements RequestHandler<Object, List<BookDto>> {
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(FindAllBooksHandler.class);
 
-    private final DynamoDbClient dynamoDb = DynamoDbClientProvider.getClient();
-    private final String table = System.getenv().getOrDefault("BOOK_TABLE", "books");
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Override
-    public List<BookDto> handleRequest(Object input, Context context) {
-        ScanResponse resp = dynamoDb.scan(ScanRequest.builder().tableName(table).build());
-        List<BookDto> list = new ArrayList<>();
-        for (Map<String, AttributeValue> item : resp.items()) {
-            BookDto b = new BookDto();
-            if (item.containsKey("id")) b.setId(item.get("id").s());
-            if (item.containsKey("title")) b.setTitle(item.get("title").s());
-            if (item.containsKey("author")) b.setAuthor(item.get("author").s());
-            if (item.containsKey("year")) b.setYear(item.containsKey("year") ? Integer.valueOf(item.get("year").n()) : null);
-            if (item.containsKey("price")) b.setPrice(item.containsKey("price") ? Double.valueOf(item.get("price").n()) : null);
-            list.add(b);
-        }
-        return list;
-    }
+	@Override
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		try {
+			List<BookDto> books = BookDao.findAll();
+
+			if (CollectionUtils.isNullOrEmpty(books)) {
+				return PayloadUtil.notFoundResponse("Books not found");
+			}
+
+			return PayloadUtil.successResponse(MAPPER.writeValueAsString(books));
+		} catch (Exception e) {
+			return PayloadUtil.internalServerErrorResponse(e);
+		}
+	}
+
 }
