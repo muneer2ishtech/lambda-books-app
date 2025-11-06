@@ -15,6 +15,7 @@ import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
 import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
 import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
+import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
 import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -62,14 +63,14 @@ public class FindBookByIdHandler implements RequestHandler<APIGatewayProxyReques
 	private BookDto findOneById(String id) {
 		log.debug("Input Book ID:{}", id);
 
-		Map<String, AttributeValue> key = Map.of("id", AttributeValue.builder().s(id).build());
+		Map<String, AttributeValue> key = IdUtil.makeKey(id);
 
 		// @formatter:off
 		GetItemResponse resp = dynamoDb.getItem(
 				GetItemRequest.builder()
 					.tableName(AppConstants.TABLE_BOOK)
 					.key(key)
-				.build());
+					.build());
 		// @formatter:on
 
 		BookDto book = BookMapper.fromItemResponse(resp);
