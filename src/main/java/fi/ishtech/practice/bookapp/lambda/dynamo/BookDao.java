@@ -1,5 +1,6 @@
 package fi.ishtech.practice.bookapp.lambda.dynamo;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 
 public class BookDao {
 
@@ -40,6 +43,20 @@ public class BookDao {
 		return book;
 	}
 
+	public static List<BookDto> findAllBooks() {
+		// @formatter:off
+		ScanResponse resp = dynamoDb.scan(
+				ScanRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.build());
+		// @formatter:on
+
+		List<BookDto> books = BookMapper.fromScanResponse(resp);
+		log.trace("Output Books:{}", books);
+
+		return books;
+	}
+
 	public static BookDto findOneById(String id) {
 		log.debug("Input Book ID:{}", id);
 
@@ -55,10 +72,11 @@ public class BookDao {
 		log.debug("Input Book ID:{}", id);
 
 		// @formatter:off
-		dynamoDb.deleteItem(DeleteItemRequest.builder()
-				.tableName(AppConstants.TABLE_BOOK)
-				.key(IdUtil.makeKey(id))
-				.build());
+		dynamoDb.deleteItem(
+				DeleteItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.key(IdUtil.makeKey(id))
+					.build());
 		// @formatter:on
 	}
 
