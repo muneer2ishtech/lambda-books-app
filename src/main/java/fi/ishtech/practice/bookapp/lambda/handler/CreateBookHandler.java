@@ -49,13 +49,11 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 
 			responseBody.put(BookDto.ID, book.getId());
 
-			// @formatter:off
 			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
-			// @formatter:on
 		} catch (IllegalArgumentException e) {
-			return PayloadUtil.errorResponse(400, "Bad Request", e);
+			return PayloadUtil.badRequestResponse(e);
 		} catch (Exception e) {
-			return PayloadUtil.errorResponse(500, "Internal server error", e);
+			return PayloadUtil.internalServerErrorResponse(e);
 		}
 	}
 

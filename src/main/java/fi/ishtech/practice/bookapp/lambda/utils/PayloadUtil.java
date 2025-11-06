@@ -31,7 +31,11 @@ public class PayloadUtil {
 				.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
 		// @formatter:on
 	}
-	
+
+	public static APIGatewayProxyResponseEvent successResponse(String body) {
+		return successResponse(200, body);
+	}
+
 	public static APIGatewayProxyResponseEvent errorResponse(int status, String error, Exception ex) {
 		Map<String, Object> errorBody = new HashMap<>();
 		errorBody.put(STATUS, status);
@@ -55,6 +59,32 @@ public class PayloadUtil {
 					.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
 			// @formatter:on
 		}
+	}
+
+	public static APIGatewayProxyResponseEvent errorResponse(int status, String error, String message) {
+		Map<String, Object> errorBody = new HashMap<>();
+		errorBody.put(STATUS, status);
+		errorBody.put(ERROR, error);
+		errorBody.put(MESSAGE, message);
+
+		// @formatter:off
+		return new APIGatewayProxyResponseEvent()
+				.withStatusCode(500)
+				.withBody("{\"status\":500,\"error\":\"Serialization failed\"}")
+				.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
+		// @formatter:on
+	}
+
+	public static APIGatewayProxyResponseEvent internalServerErrorResponse(Exception e) {
+		return errorResponse(500, "Internal server error", e);
+	}
+
+	public static APIGatewayProxyResponseEvent badRequestResponse(IllegalArgumentException e) {
+		return errorResponse(400, "Bad Request", e);
+	}
+
+	public static APIGatewayProxyResponseEvent notFoundResponse(String message) {
+		return errorResponse(404, "Not found", message);
 	}
 
 }
