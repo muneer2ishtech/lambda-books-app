@@ -11,16 +11,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
-import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
 import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
@@ -33,7 +26,6 @@ public class FindBookByIdHandler implements RequestHandler<APIGatewayProxyReques
 	private static final Logger log = LoggerFactory.getLogger(FindBookByIdHandler.class);
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
@@ -48,7 +40,7 @@ public class FindBookByIdHandler implements RequestHandler<APIGatewayProxyReques
 		}
 
 		try {
-			BookDto book = findOneById(id);
+			BookDto book = BookDao.findOneById(id);
 
 			if (book == null) {
 				return PayloadUtil.notFoundResponse("Book for id:" + id + " not found");
@@ -58,25 +50,6 @@ public class FindBookByIdHandler implements RequestHandler<APIGatewayProxyReques
 		} catch (Exception e) {
 			return PayloadUtil.internalServerErrorResponse(e);
 		}
-	}
-
-	private BookDto findOneById(String id) {
-		log.debug("Input Book ID:{}", id);
-
-		Map<String, AttributeValue> key = IdUtil.makeKey(id);
-
-		// @formatter:off
-		GetItemResponse resp = dynamoDb.getItem(
-				GetItemRequest.builder()
-					.tableName(AppConstants.TABLE_BOOK)
-					.key(key)
-					.build());
-		// @formatter:on
-
-		BookDto book = BookMapper.fromItemResponse(resp);
-		log.debug("Output Book:{}", book);
-
-		return book;
 	}
 
 }
