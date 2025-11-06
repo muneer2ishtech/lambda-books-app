@@ -1,84 +1,54 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
+import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
- * Handler for updating book
+ * Handler for updating an existing book
  *
  * @author Muneer Ahmed Syed
  */
-public class UpdateBookHandler implements RequestHandler<BookDto, String> {
+public class UpdateBookHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private static final Logger log = LoggerFactory.getLogger(UpdateBookHandler.class);
 
-	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	@Override
-	public String handleRequest(BookDto book, Context context) {
-		log.debug("Input Book:{}", book);
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		String input = request.getBody();
+		log.debug("Input: {}", input);
 
-		if (book.getId() == null)
-			throw new IllegalArgumentException("id required");
-
-		Map<String, String> exprNames = new HashMap<>();
-		Map<String, AttributeValue> exprValues = new HashMap<>();
-		StringBuilder setExpr = new StringBuilder();
-
-		if (book.getTitle() != null) {
-			append(setExpr, exprNames, exprValues, "#t", ":t", "title",
-					AttributeValue.builder().s(book.getTitle()).build());
-		}
-		if (book.getAuthor() != null) {
-			append(setExpr, exprNames, exprValues, "#a", ":a", "author",
-					AttributeValue.builder().s(book.getAuthor()).build());
-		}
-		if (book.getYear() != null) {
-			append(setExpr, exprNames, exprValues, "#y", ":y", "year",
-					AttributeValue.builder().n(String.valueOf(book.getYear())).build());
-		}
-		if (book.getPrice() != null) {
-			append(setExpr, exprNames, exprValues, "#p", ":p", "price",
-					AttributeValue.builder().n(String.valueOf(book.getPrice())).build());
+		if (input == null) {
+			throw new IllegalArgumentException("Input body for Book is mandatory");
 		}
 
-		if (setExpr.length() == 0)
-			return "nothing to update";
+		try {
+			BookDto book = MAPPER.readValue(input, BookDto.class);			log.trace(input);
 
-		// @formatter:off
-		UpdateItemRequest req = UpdateItemRequest.builder()
-				.tableName(AppConstants.TABLE_BOOK)
-				.key(Map.of("id", AttributeValue.builder().s(book.getId()).build()))
-				.updateExpression("SET " + setExpr.toString())
-				.expressionAttributeNames(exprNames)
-				.expressionAttributeValues(exprValues)
-				.build();
-		// @formatter:on
+			if (StringUtils.isBlank(book.getId())) {
+				throw new IllegalArgumentException("Input Book to update must have id");
+			}
 
-		dynamoDb.updateItem(req);
-		return book.getId();
-	}
+			BookDao.findAndUpdateBook(book);
 
-	private void append(StringBuilder setExpr, Map<String, String> names, Map<String, AttributeValue> values,
-			String nameKey, String valueKey, String attrName, AttributeValue attrValue) {
-		if (setExpr.length() > 0)
-			setExpr.append(", ");
-		setExpr.append(nameKey).append(" = ").append(valueKey);
-		names.put(nameKey, attrName);
-		values.put(valueKey, attrValue);
+			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
+		} catch (IllegalArgumentException e) {
+			return PayloadUtil.badRequestResponse(e);
+		} catch (Exception e) {
+			return PayloadUtil.internalServerErrorResponse(e);
+		}
 	}
 
 }

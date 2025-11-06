@@ -90,6 +90,30 @@ public class BookDao {
 		return result;
 	}
 
+	public static BookDto findAndUpdateBook(BookDto book) {
+		log.debug("Input Book:{}", book);
+		
+		GetItemResponse ex = fetchOneById(book.getId());
+		
+		if (ex == null || !ex.hasItem()) {
+			log.debug("Book with id:{} not found", book.getId());
+			return null;
+		}
+
+		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
+
+		// @formatter:off
+		dynamoDb.putItem(
+				PutItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.item(item)
+					.build());
+		// @formatter:on
+		log.debug("Updted Book with id:{}", book.getId());
+
+		return book;
+	}
+
 	private static GetItemResponse fetchOneById(String id) {
 		Map<String, AttributeValue> key = IdUtil.makeKey(id);
 
