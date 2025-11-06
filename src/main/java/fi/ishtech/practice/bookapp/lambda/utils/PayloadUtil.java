@@ -79,6 +79,10 @@ public class PayloadUtil {
 		return errorResponse(500, "Internal server error", e);
 	}
 
+	public static APIGatewayProxyResponseEvent internalServerErrorResponse(String message) {
+		return errorResponse(500, "Internal server error", message);
+	}
+
 	public static APIGatewayProxyResponseEvent badRequestResponse(IllegalArgumentException e) {
 		return errorResponse(400, "Bad Request", e);
 	}
@@ -89,6 +93,10 @@ public class PayloadUtil {
 	
 	public static APIGatewayProxyResponseEvent notFoundResponse(String message) {
 		return errorResponse(404, "Not found", message);
+	}
+
+	public static APIGatewayProxyResponseEvent goneResponse(String message) {
+		return errorResponse(410, "Gone", message);
 	}
 
 }

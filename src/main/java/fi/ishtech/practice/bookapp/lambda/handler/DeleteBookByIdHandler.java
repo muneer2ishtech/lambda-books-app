@@ -2,34 +2,51 @@ package fi.ishtech.practice.bookapp.lambda.handler;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
+import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Handler for deleting book
  *
  * @author Muneer Ahmed Syed
  */
-public class DeleteBookByIdHandler implements RequestHandler<String, String> {
+public class DeleteBookByIdHandler
+		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-	private final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
+	public static final Logger log = LoggerFactory.getLogger(DeleteBookByIdHandler.class);
 
 	@Override
-	public String handleRequest(String id, Context context) {
-		// @formatter:off
-		dynamoDb.deleteItem(DeleteItemRequest.builder()
-				.tableName(AppConstants.TABLE_BOOK)
-				.key(Map.of("id", AttributeValue.builder().s(id).build()))
-				.build());
-		// @formatter:on
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		Map<String, String> pathParams = request.getPathParameters();
+		log.trace("Request PathParameters: {}", pathParams);
 
-		return id;
+		String id = pathParams.get(BookDto.ID);
+		log.debug("Input id:{}", id);
+
+		if (StringUtils.isBlank(id)) {
+			return PayloadUtil.badRequestResponse("Input id is mandatory");
+		}
+
+		try {
+			boolean result = BookDao.deleteByIdAndConfirm(id);
+			if (result) {
+				return PayloadUtil.goneResponse("Deleted successfully Book with id:" + id);
+			} else {
+				return PayloadUtil.internalServerErrorResponse("Delete failed for Book with id:" + id);
+			}
+		} catch (Exception e) {
+			return PayloadUtil.internalServerErrorResponse(e);
+		}
 	}
 
 }
