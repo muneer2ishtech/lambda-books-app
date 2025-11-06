@@ -29,24 +29,21 @@ public class BookDao {
 
 	private static final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
 
-	public static BookDto createBook(BookDto book) {
+	public static BookDto createNew(BookDto book) {
 		log.debug("Input Book:{}", book);
 
 		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
 
-		// @formatter:off
-		dynamoDb.putItem(
-				PutItemRequest.builder()
-					.tableName(AppConstants.TABLE_BOOK)
-					.item(item)
-					.build());
+		putItemInDb(item);
 		// @formatter:on
 		log.debug("Created Book with id:{}", book.getId());
+
+		// TODO: return freshly fetched item from DB
 
 		return book;
 	}
 
-	public static List<BookDto> findAllBooks() {
+	public static List<BookDto> findAll() {
 		// @formatter:off
 		ScanResponse resp = dynamoDb.scan(
 				ScanRequest.builder()
@@ -93,11 +90,11 @@ public class BookDao {
 		return result;
 	}
 
-	public static BookDto findAndUpdateBook(BookDto book) {
+	public static BookDto findAndUpdate(BookDto book) {
 		log.debug("Input Book:{}", book);
-		
+
 		GetItemResponse ex = fetchOneById(book.getId());
-		
+
 		if (ex == null || !ex.hasItem()) {
 			log.debug("Book with id:{} not found", book.getId());
 			return null;
@@ -105,14 +102,11 @@ public class BookDao {
 
 		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
 
-		// @formatter:off
-		dynamoDb.putItem(
-				PutItemRequest.builder()
-					.tableName(AppConstants.TABLE_BOOK)
-					.item(item)
-					.build());
+		putItemInDb(item);
 		// @formatter:on
-		log.debug("Updted Book with id:{}", book.getId());
+		log.debug("Updated Book of id:{}", book.getId());
+
+		// TODO: return freshly fetched item from DB
 
 		return book;
 	}

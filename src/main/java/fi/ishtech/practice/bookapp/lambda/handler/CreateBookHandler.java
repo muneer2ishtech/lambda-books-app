@@ -44,7 +44,7 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 
 			book.setId(IdUtil.newId());
 
-			BookDao.createBook(book);
+			BookDao.createNew(book);
 
 			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
 		} catch (IllegalArgumentException e) {

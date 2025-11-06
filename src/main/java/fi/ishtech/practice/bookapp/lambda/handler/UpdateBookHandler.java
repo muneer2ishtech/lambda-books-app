@@ -41,7 +41,7 @@ public class UpdateBookHandler implements RequestHandler<APIGatewayProxyRequestE
 				throw new IllegalArgumentException("Input Book to update must have id");
 			}
 
-			BookDao.findAndUpdateBook(book);
+			BookDao.findAndUpdate(book);
 
 			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(book));
 		} catch (IllegalArgumentException e) {

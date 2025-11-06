@@ -31,7 +31,7 @@ public class FindAllBooksHandler implements RequestHandler<APIGatewayProxyReques
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 		try {
-			List<BookDto> books = BookDao.findAllBooks();
+			List<BookDto> books = BookDao.findAll();
 
 			if (CollectionUtils.isNullOrEmpty(books)) {
 				return PayloadUtil.notFoundResponse("Books not found");
