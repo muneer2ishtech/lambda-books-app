@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "lambda-books-app"
+resolve_s3 = true
+s3_prefix = "lambda-books-app"
+profile = "muneer2ishtech"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[default.global.parameters]
+region = "eu-north-1"

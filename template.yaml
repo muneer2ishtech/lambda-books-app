@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Lambda Books App (Java 17 + DynamoDB)
+Description: Lambda Books App (Java 17 + DynamoDB + API Gateway)
 
 Globals:
   Function:
@@ -12,52 +12,167 @@ Globals:
         TABLE_NAME: books
 
 Resources:
+  BooksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          LoggingLevel: INFO
+          DataTraceEnabled: true
+
   CreateBookFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-create
-      Handler: fi.ishtech.practice.bookapp.lambda.CreateBookHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.CreateBookHandler::handleRequest
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: post
+            RestApiId: !Ref BooksApi
 
   UpdateBookFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-update
-      Handler: fi.ishtech.practice.bookapp.lambda.UpdateBookHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.UpdateBookHandler::handleRequest
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: put
+            RestApiId: !Ref BooksApi
 
   DeleteBookByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-delete-by-id
-      Handler: fi.ishtech.practice.bookapp.lambda.DeleteBookByIdHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.DeleteBookByIdHandler::handleRequest
+      CodeUri: .
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: delete
+            RestApiId: !Ref BooksApi
 
   FindAllBooksFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-find-all
-      Handler: fi.ishtech.practice.bookapp.lambda.FindAllBooksHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.FindAllBooksHandler::handleRequest
+      CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: get
+            RestApiId: !Ref BooksApi
 
   FindBookByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: lambda-books-find-by-id
-      Handler: fi.ishtech.practice.bookapp.lambda.FindBookByIdHandler::handleRequest
-      CodeUri: target/lambda-books-app.jar
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.FindBookByIdHandler::handleRequest
+      CodeUri: .
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: get
+            RestApiId: !Ref BooksApi
+
+  UpdateBookAttribsByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-books-update-attribs-by-id
+      Handler: fi.ishtech.practice.bookapp.lambda.handler.UpdateBookAttribsByIdHandler::handleRequest
+      CodeUri: .
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: patch
+            RestApiId: !Ref BooksApi
+
+  # ---- Lambda Invoke Permissions ----
+  CreateBookFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CreateBookFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/POST/books
+
+  FindAllBooksFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref FindAllBooksFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/GET/books
+
+  FindBookByIdFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref FindBookByIdFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/GET/books/*
+
+  UpdateBookFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref UpdateBookFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/PUT/books/*
+
+  DeleteBookByIdFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref DeleteBookByIdFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/DELETE/books/*
+
+  UpdateBookAttribsByIdFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref UpdateBookAttribsByIdFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BooksApi}/*/PATCH/books/*
