@@ -21,7 +21,9 @@ Resources:
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
       MethodSettings:
-        - LoggingLevel: INFO
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          LoggingLevel: INFO
           DataTraceEnabled: true
 
   CreateBookFunction:
