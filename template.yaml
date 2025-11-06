@@ -20,94 +20,6 @@ Resources:
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
-      DefinitionBody:
-        swagger: "2.0"
-        info:
-          title: "Books API"
-          version: "1.0"
-        paths:
-          /books:
-            post:
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateBookFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws
-                requestTemplates:
-                  application/json: |
-                    #set($inputRoot = $input.path('$'))
-                    $input.body
-                responses:
-                  default:
-                    statusCode: 200
-              responses: {}
-            get:
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FindAllBooksFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws
-                requestTemplates:
-                  application/json: |
-                    {}
-                responses:
-                  default:
-                    statusCode: 200
-                    responseTemplates:
-                      application/json: |
-                        #if($input.path('$.body') && $input.path('$.body') != "")
-                          $input.body
-                        #else
-                          []
-                        #end
-
-          /books/{id}:
-            get:
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FindBookByIdFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws
-                requestTemplates:
-                  application/json: |
-                    {
-                      "id": "$input.params('id')"
-                    }
-                responses:
-                  default:
-                    statusCode: 200
-              responses: {}
-            put:
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateBookFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws
-                requestTemplates:
-                  application/json: |
-                    {
-                      "id": "$input.params('id')",
-                      "body": $input.body
-                    }
-                responses:
-                  default:
-                    statusCode: 200
-              responses: {}
-            delete:
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteBookByIdFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws
-                requestTemplates:
-                  application/json: |
-                    {
-                      "id": "$input.params('id')"
-                    }
-                responses:
-                  default:
-                    statusCode: 200
-              responses: {}
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
@@ -118,6 +30,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: post
+            RestApiId: !Ref BooksApi
 
   UpdateBookFunction:
     Type: AWS::Serverless::Function
@@ -128,6 +47,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: put
+            RestApiId: !Ref BooksApi
 
   DeleteBookByIdFunction:
     Type: AWS::Serverless::Function
@@ -138,6 +64,13 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: delete
+            RestApiId: !Ref BooksApi
 
   FindAllBooksFunction:
     Type: AWS::Serverless::Function
@@ -148,6 +81,13 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: get
+            RestApiId: !Ref BooksApi
 
   FindBookByIdFunction:
     Type: AWS::Serverless::Function
@@ -158,6 +98,13 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: books
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{id}
+            Method: get
+            RestApiId: !Ref BooksApi
 
   # ---- Lambda Invoke Permissions ----
   CreateBookFunctionPermission:
