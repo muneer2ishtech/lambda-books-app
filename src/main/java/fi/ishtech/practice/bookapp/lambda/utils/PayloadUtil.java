@@ -18,6 +18,7 @@ public class PayloadUtil {
 	private static final String MESSAGE = "message";
 	private static final String CONTENT_TYPE = "Content-Type";
 	private static final String APPLICATION_JSON = "application/json";
+	private static final String SERIALIZATION_ERROR_MESSAGE = "{\"status\":500,\"error\":\"Serialization failed\"}";
 
 	private static final Map<String, String> CONTENT_TYPE_APPLICATION_JSON = Map.of(CONTENT_TYPE, APPLICATION_JSON);
 
@@ -43,6 +44,19 @@ public class PayloadUtil {
 		errorBody.put(EXCEPTION, ex.getCause() != null ? ex.getCause().getClass().getName() : ex.getClass().getName());
 		errorBody.put(MESSAGE, ex.getMessage());
 
+		return errorResponse(status, errorBody);
+	}
+
+	public static APIGatewayProxyResponseEvent errorResponse(int status, String error, String message) {
+		Map<String, Object> errorBody = new HashMap<>();
+		errorBody.put(STATUS, status);
+		errorBody.put(ERROR, error);
+		errorBody.put(MESSAGE, message);
+
+		return errorResponse(status, errorBody);
+	}
+
+	private static APIGatewayProxyResponseEvent errorResponse(int status, Map<String, Object> errorBody) {
 		try {
 			// @formatter:off
 			return new APIGatewayProxyResponseEvent()
@@ -55,24 +69,10 @@ public class PayloadUtil {
 			// @formatter:off
 			return new APIGatewayProxyResponseEvent()
 					.withStatusCode(500)
-					.withBody("{\"status\":500,\"error\":\"Serialization failed\"}")
+					.withBody(SERIALIZATION_ERROR_MESSAGE)
 					.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
 			// @formatter:on
 		}
-	}
-
-	public static APIGatewayProxyResponseEvent errorResponse(int status, String error, String message) {
-		Map<String, Object> errorBody = new HashMap<>();
-		errorBody.put(STATUS, status);
-		errorBody.put(ERROR, error);
-		errorBody.put(MESSAGE, message);
-
-		// @formatter:off
-		return new APIGatewayProxyResponseEvent()
-				.withStatusCode(500)
-				.withBody("{\"status\":500,\"error\":\"Serialization failed\"}")
-				.withHeaders(CONTENT_TYPE_APPLICATION_JSON);
-		// @formatter:on
 	}
 
 	public static APIGatewayProxyResponseEvent internalServerErrorResponse(Exception e) {
@@ -86,6 +86,7 @@ public class PayloadUtil {
 	public static APIGatewayProxyResponseEvent badRequestResponse(String message) {
 		return errorResponse(400, "Bad Request", message);
 	}
+	
 	public static APIGatewayProxyResponseEvent notFoundResponse(String message) {
 		return errorResponse(404, "Not found", message);
 	}
