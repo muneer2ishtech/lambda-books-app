@@ -1,48 +1,58 @@
 package fi.ishtech.practice.bookapp.lambda.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-<<<<<<< HEAD:src/main/java/fi/ishtech/practice/bookapp/lambda/CreateBookHandler.java
-=======
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.ishtech.practice.bookapp.lambda.AppConstants;
 import fi.ishtech.practice.bookapp.lambda.dto.BookDto;
-import fi.ishtech.practice.bookapp.lambda.mapper.BookMapper;
-import fi.ishtech.practice.bookapp.lambda.utils.DynamoDbUtil;
+import fi.ishtech.practice.bookapp.lambda.dynamo.BookDao;
 import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
->>>>>>> 22f352e (refactor package name):src/main/java/fi/ishtech/practice/bookapp/lambda/handler/CreateBookHandler.java
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import fi.ishtech.practice.bookapp.lambda.utils.PayloadUtil;
+import software.amazon.awssdk.utils.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+/**
+ * Handler for creating a new book
+ *
+ * @author Muneer Ahmed Syed
+ */
+public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-public class CreateBookHandler implements RequestHandler<BookDto, String> {
+	private static final Logger log = LoggerFactory.getLogger(CreateBookHandler.class);
 
-    private final DynamoDbClient dynamoDb = DynamoDbClientProvider.getClient();
-    private final String table = System.getenv().getOrDefault("BOOK_TABLE", "books");
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Override
-    public String handleRequest(BookDto book, Context context) {
-        if (book.getId() == null || book.getId().isEmpty()) {
-            book.setId(UUID.randomUUID().toString());
-        }
+	@Override
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		String inputBody = request.getBody();
+		log.trace("Input body: {}", inputBody);
 
-        Map<String, AttributeValue> item = new HashMap<>();
-        item.put("id", AttributeValue.builder().s(book.getId()).build());
-        if (book.getTitle() != null) item.put("title", AttributeValue.builder().s(book.getTitle()).build());
-        if (book.getAuthor() != null) item.put("author", AttributeValue.builder().s(book.getAuthor()).build());
-        if (book.getYear() != null) item.put("year", AttributeValue.builder().n(String.valueOf(book.getYear())).build());
-        if (book.getPrice() != null) item.put("price", AttributeValue.builder().n(String.valueOf(book.getPrice())).build());
+		if (inputBody == null) {
+			throw new IllegalArgumentException("Input body for Book is mandatory");
+		}
 
-        dynamoDb.putItem(PutItemRequest.builder()
-                .tableName(table)
-                .item(item)
-                .build());
+		try {
+			BookDto input = MAPPER.readValue(inputBody, BookDto.class);
+			log.trace("Input:{}", input);
 
-        return book.getId();
-    }
+			if (StringUtils.isNotBlank(input.getId())) {
+				throw new IllegalArgumentException("Input for new Book cannot have id");
+			}
+
+			input.setId(IdUtil.newId());
+
+			BookDto output = BookDao.createNew(input);
+
+			return PayloadUtil.successResponse(201, MAPPER.writeValueAsString(output));
+		} catch (IllegalArgumentException e) {
+			return PayloadUtil.badRequestResponse(e);
+		} catch (Exception e) {
+			return PayloadUtil.internalServerErrorResponse(e);
+		}
+	}
+
 }
