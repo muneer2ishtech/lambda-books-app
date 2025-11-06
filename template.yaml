@@ -53,7 +53,14 @@ Resources:
                 responses:
                   default:
                     statusCode: 200
-              responses: {}
+                    responseTemplates:
+                      application/json: |
+                        #if($input.path('$.body') && $input.path('$.body') != "")
+                          $input.body
+                        #else
+                          []
+                        #end
+
           /books/{id}:
             get:
               x-amazon-apigateway-integration:
@@ -152,7 +159,7 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: books
 
-  # ---- Lambda Invoke Permissions (FIX) ----
+  # ---- Lambda Invoke Permissions ----
   CreateBookFunctionPermission:
     Type: AWS::Lambda::Permission
     Properties:
