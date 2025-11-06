@@ -61,13 +61,13 @@ public class UpdateBookAttribsByIdHandler
 		}
 
 		try {
-			BookDto book = BookDao.updateAttribsById(id, bookParams);
+			BookDto output = BookDao.updateAttribsById(id, bookParams);
 
-			if (book == null) {
+			if (output == null) {
 				return PayloadUtil.notFoundResponse("Book for id:" + id + " not found");
 			}
 
-			return PayloadUtil.successResponse(MAPPER.writeValueAsString(book));
+			return PayloadUtil.successResponse(MAPPER.writeValueAsString(output));
 		} catch (Exception e) {
 			return PayloadUtil.internalServerErrorResponse(e);
 		}
