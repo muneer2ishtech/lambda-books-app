@@ -3,6 +3,7 @@ package fi.ishtech.practice.bookapp.lambda.dto;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -34,6 +35,9 @@ public class BookDto implements Serializable {
 
 	@JsonIgnore
 	public static final String PRICE = "price";
+
+	@JsonIgnore
+	public static final Set<String> ATTRIB_NAMES = Set.of(ID, TITLE, AUTHOR, YEAR, PRICE);
 
 	private String id;
 	private String title;

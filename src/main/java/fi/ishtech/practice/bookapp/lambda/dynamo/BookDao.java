@@ -1,5 +1,6 @@
 package fi.ishtech.practice.bookapp.lambda.dynamo;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +18,10 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.PutItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
+import software.amazon.awssdk.utils.StringUtils;
 
 public class BookDao {
 
@@ -126,6 +129,64 @@ public class BookDao {
 		// @formatter:on
 
 		return resp;
+	}
+
+	public static BookDto updateAttribsById(String id, Map<String, String> bookParams) {
+		log.debug("Input id:{}, params:{}", id, bookParams);
+
+		GetItemResponse ex = fetchOneById(id);
+
+		if (ex == null || !ex.hasItem()) {
+			log.debug("Book with id:{} not found", id);
+			return null;
+		}
+
+		Map<String, AttributeValue> item = ex.item();
+
+		String title = bookParams.get(BookDto.TITLE);
+		if (StringUtils.isEmpty(title)) {
+			item.put(BookDto.TITLE, DynamoDbUtil.buildStringAttribute(title));
+		}
+
+		String author = bookParams.get(BookDto.AUTHOR);
+		if (StringUtils.isEmpty(author)) {
+			item.put(BookDto.AUTHOR, DynamoDbUtil.buildStringAttribute(author));
+		}
+
+		String strYear = bookParams.get(BookDto.YEAR);
+		if (StringUtils.isEmpty(strYear)) {
+			try {
+				item.put(BookDto.YEAR, DynamoDbUtil.buildNumberAttribute(Short.valueOf(strYear)));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Invalid input for year:" + strYear, e);
+			}
+		}
+
+		String strPrice = bookParams.get(BookDto.PRICE);
+		if (StringUtils.isEmpty(strPrice)) {
+			try {
+				item.put(BookDto.PRICE, DynamoDbUtil.buildNumberAttribute(new BigDecimal(strPrice)));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Invalid input for year:" + strYear, e);
+			}
+		}
+
+		putItemInDb(item);
+		log.debug("Updated Book attributes of id:{}", id);
+
+		// TODO: return freshly fetched item from DB
+
+		return BookMapper.fromAttributeMap(item);
+	}
+
+	private static PutItemResponse putItemInDb(Map<String, AttributeValue> item) {
+		// @formatter:off
+		return dynamoDb.putItem(
+				PutItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.item(item)
+					.build());
+		// @formatter:on
 	}
 
 }
