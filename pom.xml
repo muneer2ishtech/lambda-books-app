@@ -16,7 +16,9 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
 		<aws.sdk.version>2.37.4</aws.sdk.version>
-		<lambda.core.version>1.4.0</lambda.core.version>
+		<aws-lambda-java-core.version>1.4.0</aws-lambda-java-core.version>
+		<aws-lambda-java-events.version>3.16.1</aws-lambda-java-events.version>
+
 		<jackson.version>2.20.1</jackson.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
@@ -27,7 +29,12 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-lambda-java-core</artifactId>
-			<version>${lambda.core.version}</version>
+			<version>${aws-lambda-java-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>${aws-lambda-java-events.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
