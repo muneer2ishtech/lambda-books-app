@@ -15,6 +15,7 @@ import fi.ishtech.practice.bookapp.lambda.utils.IdUtil;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -23,29 +24,20 @@ import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 import software.amazon.awssdk.utils.StringUtils;
 
+/**
+ * Dao to read, write to books table
+ *
+ * @author Muneer Ahmed Syed
+ */
 public class BookDao {
 
 	public static final Logger log = LoggerFactory.getLogger(BookDao.class);
 
-	private static final DynamoDbClient dynamoDb = DynamoDbUtil.getClient();
-
-	public static BookDto createNew(BookDto book) {
-		log.debug("Input Book:{}", book);
-
-		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
-
-		putItemInDb(item);
-		// @formatter:on
-		log.debug("Created Book with id:{}", book.getId());
-
-		// TODO: return freshly fetched item from DB
-
-		return book;
-	}
+	private static final DynamoDbClient DYNAMO_DB_CLIENT = DynamoDbUtil.getClient();
 
 	public static List<BookDto> findAll() {
 		// @formatter:off
-		ScanResponse resp = dynamoDb.scan(
+		ScanResponse resp = DYNAMO_DB_CLIENT.scan(
 				ScanRequest.builder()
 					.tableName(AppConstants.TABLE_BOOK)
 					.build());
@@ -68,18 +60,6 @@ public class BookDao {
 		return book;
 	}
 
-	public static void deleteById(String id) {
-		log.debug("Input Book ID:{}", id);
-
-		// @formatter:off
-		dynamoDb.deleteItem(
-				DeleteItemRequest.builder()
-					.tableName(AppConstants.TABLE_BOOK)
-					.key(IdUtil.makeKey(id))
-					.build());
-		// @formatter:on
-	}
-
 	public static boolean deleteByIdAndConfirm(String id) {
 		deleteById(id);
 
@@ -88,6 +68,20 @@ public class BookDao {
 		log.debug("Delete{} Book with id:{}", result ? "d successfully" : " failed for", id);
 
 		return result;
+	}
+
+	public static BookDto createNew(BookDto book) {
+		log.debug("Input Book:{}", book);
+
+		Map<String, AttributeValue> item = BookMapper.makeAttributeMap(book);
+
+		putItemInDb(item);
+		// @formatter:on
+		log.debug("Created Book with id:{}", book.getId());
+
+		// TODO: return freshly fetched item from DB
+
+		return book;
 	}
 
 	public static BookDto findAndUpdate(BookDto book) {
@@ -109,20 +103,6 @@ public class BookDao {
 		// TODO: return freshly fetched item from DB
 
 		return book;
-	}
-
-	private static GetItemResponse fetchOneById(String id) {
-		Map<String, AttributeValue> key = IdUtil.makeKey(id);
-
-		// @formatter:off
-		GetItemResponse resp = dynamoDb.getItem(
-				GetItemRequest.builder()
-					.tableName(AppConstants.TABLE_BOOK)
-					.key(key)
-					.build());
-		// @formatter:on
-
-		return resp;
 	}
 
 	public static BookDto updateAttribsById(String id, Map<String, String> bookParams) {
@@ -173,9 +153,35 @@ public class BookDao {
 		return BookMapper.fromAttributeMap(item);
 	}
 
+	private static GetItemResponse fetchOneById(String id) {
+		Map<String, AttributeValue> key = IdUtil.makeKey(id);
+
+		// @formatter:off
+		GetItemResponse resp = DYNAMO_DB_CLIENT.getItem(
+				GetItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.key(key)
+					.build());
+		// @formatter:on
+
+		return resp;
+	}
+
+	private static DeleteItemResponse deleteById(String id) {
+		log.debug("Input Book ID:{}", id);
+
+		// @formatter:off
+		return DYNAMO_DB_CLIENT.deleteItem(
+				DeleteItemRequest.builder()
+					.tableName(AppConstants.TABLE_BOOK)
+					.key(IdUtil.makeKey(id))
+					.build());
+		// @formatter:on
+	}
+
 	private static PutItemResponse putItemInDb(Map<String, AttributeValue> item) {
 		// @formatter:off
-		return dynamoDb.putItem(
+		return DYNAMO_DB_CLIENT.putItem(
 				PutItemRequest.builder()
 					.tableName(AppConstants.TABLE_BOOK)
 					.item(item)
